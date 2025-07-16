@@ -1,0 +1,21 @@
+@GlobalExceptionHandler_HostAddress = http://localhost:5156
+
+GET {{GlobalExceptionHandler_HostAddress}}/exception/
+Content-Type:  none
+
+###
+
+GET {{GlobalExceptionHandler_HostAddress}}/divideByZero/
+Content-Type:  none
+
+###
+
+POST {{GlobalExceptionHandler_HostAddress}}/validationException/
+Content-Type: application/json
+
+{
+    "firstName": "",
+    "lastName": "Doe",
+    "eMail": "doe.john",
+    "mobileNo": "+91 9999999999"
+}
