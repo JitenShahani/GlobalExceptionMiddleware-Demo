@@ -1,6 +1,6 @@
 ﻿namespace GlobalExceptionHandler.Dto;
 
-public class Person
+public sealed class Person
 {
 	public string FirstName { get; set; } = string.Empty;
 	public string LastName { get; set; } = string.Empty;

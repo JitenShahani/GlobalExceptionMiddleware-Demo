@@ -10,6 +10,11 @@ Content-Type:  none
 
 ###
 
+GET {{GlobalExceptionHandler_HostAddress}}/badRequest/
+Content-Type:  none
+
+###
+
 POST {{GlobalExceptionHandler_HostAddress}}/validationException/
 Content-Type: application/json
 

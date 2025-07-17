@@ -13,6 +13,7 @@ public sealed class ValidationExceptionHandler (
 
 		httpContext.Response.StatusCode = exception switch
 		{
+			ValidationException _ => StatusCodes.Status400BadRequest,
 			ApplicationException _ => StatusCodes.Status400BadRequest,
 			_ => StatusCodes.Status500InternalServerError
 		};

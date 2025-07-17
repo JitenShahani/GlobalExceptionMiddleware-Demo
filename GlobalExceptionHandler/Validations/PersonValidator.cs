@@ -1,6 +1,6 @@
 ﻿namespace GlobalExceptionHandler.Validations;
 
-public class PersonValidator : AbstractValidator<Person>
+public sealed class PersonValidator : AbstractValidator<Person>
 {
 	public PersonValidator ()
 	{

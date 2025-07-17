@@ -17,6 +17,13 @@ public sealed class MyEndpoints
 			return TypedResults.Ok (result);
 		});
 
+		app.MapGet ("/badRequest/{name}", ([FromRoute] string? name) =>
+		{
+			return name is null
+				? Results.BadRequest()
+				: TypedResults.Ok (name);
+		});
+
 		app.MapPost ("/validationException", (
 			[FromBody] Person request,
 			[FromServices] IValidator<Person> validator) =>

@@ -4,7 +4,7 @@ public static class IoC
 {
 	public static void ConfigureIoCContainer (this WebApplicationBuilder builder)
 	{
-		// Register DivideByZero Exception Handler
+		// Register Validation Exception Handler
 		builder.Services.AddExceptionHandler<ValidationExceptionHandler> ();
 
 		// Register Generic Global Exception Handler
@@ -16,7 +16,6 @@ public static class IoC
 		// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 		builder.Services.AddOpenApi ();
 
-		// Configure JsonOptions
 		// Configure JsonOptions
 		builder.Services.Configure<JsonOptions> (options =>
 		{
