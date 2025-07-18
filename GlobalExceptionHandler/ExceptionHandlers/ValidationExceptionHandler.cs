@@ -1,15 +1,19 @@
 ﻿namespace GlobalExceptionHandler.ExceptionHandlers;
 
-public sealed class ValidationExceptionHandler (
-	IProblemDetailsService problemDetailsService,
-	ILogger<ValidationExceptionHandler> logger) : IExceptionHandler
+public sealed class ValidationExceptionHandler : IExceptionHandler
 {
+	private readonly IProblemDetailsService _problemDetailsService;
+	private readonly ILogger<ValidationExceptionHandler> _logger;
+
+	public ValidationExceptionHandler (IProblemDetailsService problemDetailsService, ILogger<ValidationExceptionHandler> logger)
+		=> (_problemDetailsService, _logger) = (problemDetailsService, logger);
+
 	public async ValueTask<bool> TryHandleAsync (HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
 	{
 		if (exception is not ValidationException validationException)
 			return false;
 
-		logger.LogError (exception, exception.Message);
+		_logger.LogError (exception, exception.Message);
 
 		httpContext.Response.StatusCode = exception switch
 		{
@@ -21,9 +25,7 @@ public sealed class ValidationExceptionHandler (
 		var modelState = new ModelStateDictionary ();
 
 		foreach (var error in validationException.Errors)
-		{
 			modelState.AddModelError (error.PropertyName, error.ErrorMessage);
-		}
 
 		var context = new ProblemDetailsContext
 		{
@@ -37,6 +39,6 @@ public sealed class ValidationExceptionHandler (
 
 		context.ProblemDetails.Extensions["timestamp"] = DateTime.Now;
 
-		return await problemDetailsService.TryWriteAsync (context);
+		return await _problemDetailsService.TryWriteAsync (context);
 	}
 }

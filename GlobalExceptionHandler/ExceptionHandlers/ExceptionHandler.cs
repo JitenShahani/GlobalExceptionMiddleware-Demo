@@ -1,10 +1,15 @@
 ﻿namespace GlobalExceptionHandler.ExceptionHandlers;
 
-public sealed class ExceptionHandler (ILogger<ExceptionHandler> logger) : IExceptionHandler
+public sealed class ExceptionHandler : IExceptionHandler
 {
+	private readonly ILogger<ExceptionHandler> _logger;
+
+	public ExceptionHandler (ILogger<ExceptionHandler> logger)
+		=> _logger = logger;
+
 	public async ValueTask<bool> TryHandleAsync (HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
 	{
-		logger.LogError (exception, exception.Message);
+		_logger.LogError (exception, exception.Message);
 
 		httpContext.Response.StatusCode = exception switch
 		{

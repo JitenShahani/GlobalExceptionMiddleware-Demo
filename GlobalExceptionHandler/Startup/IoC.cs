@@ -7,7 +7,7 @@ public static class IoC
 		// Register Validation Exception Handler
 		builder.Services.AddExceptionHandler<ValidationExceptionHandler> ();
 
-		// Register Generic Global Exception Handler
+		// Register Global Fallback Exception Handler
 		builder.Services.AddExceptionHandler<ExceptionHandler> ();
 
 		// Register Fluent Validators

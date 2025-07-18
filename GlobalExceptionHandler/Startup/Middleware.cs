@@ -4,11 +4,12 @@ public static class Middleware
 {
 	public static void ConfigurePipeline (this WebApplication app)
 	{
-		// This middleware activates the global error handler.
-		// It tells Asp Net Core to route any exceptions to our exception handler.
+		// Activates the global exception-handling middleware.
+		// Routes unhandled exceptions to registered IExceptionHandler implementations.
 		app.UseExceptionHandler ();
 
-		// Returns the Problem Details response for (empty) non-successful responses
+		// Returns a ProblemDetails response for (empty) non-successful responses
+		// such as HTTP status codes 400, 404, 409 when the body has not been written.
 		app.UseStatusCodePages ();
 
 		if (app.Environment.IsDevelopment ())

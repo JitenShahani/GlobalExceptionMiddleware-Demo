@@ -8,8 +8,10 @@
 		- [🧱 `Program.cs`](#-program.cs)
 		- [🧱 `Startup/IoC.cs`](#-startupioc.cs)
 		- [🧱 `Startup/Middleware.cs`](#-startupmiddleware.cs)
-	- [💻 Endpoints](#-endpoints)
+    - [💻 Endpoints](#-endpoints)
 		- [💻 Endpoint Definitions (`Endpoints/MyEndpoints.cs`)](#-endpoint-definitions-endpointsmyendpoints.cs)
+		- [📦 Person DTO (`Dto/Person.cs`)](#-person-dto-dtoperson.cs)
+		- [🔍 Person Validations (`Validations/PersonValidator.cs`)](#-person-validations-validationspersonvalidator.cs)
 		- [🖥️ Sample HTTP Requests (`GlobalExceptionHandler.http`)](#-sample-http-requests-globalexceptionhandler.http)
     - [🧾 Sample Error Responses](#-sample-error-responses)
 		- [🧾 Unhandled Exception (`/exception`)](#-unhandled-exception-exception)
@@ -21,33 +23,33 @@
 		- [🔧 Inline Middleware](#-inline-middleware)
 		- [🔧 Conventional Class-Based Implementation](#-conventional-class-based-implementation)
 		- [🔧 Factory-Based Middleware (`IMiddleware`)](#-factory-based-middleware-imiddleware)
-	- [🧪 Problem Details Integration](#-problem-details-integration)
+    - [🧪 Problem Details Integration](#-problem-details-integration)
 		- [📘 RFC Reference](#-rfc-reference)
 		- [⚒️ Enabling ProblemDetails for Minimal APIs](#-enabling-problemdetails-for-minimal-apis)
-    	- [🧱 Creating and Delivering ProblemDetails Responses](#-creating-and-delivering-problemdetails-responses)
+		- [🧱 Creating and Delivering ProblemDetails Responses](#-creating-and-delivering-problemdetails-responses)
         	- [⚙️ Manually Constructing ProblemDetails (Not Recommended)](#-manually-constructing-problemdetails-not-recommended)
 				- [⚙️ Create a ProblemDetails instance manually](#-create-a-problemdetails-instance-manually)
 				- [⚙️ Create a ValidationProblemDetails instance manually](#-create-a-validationproblemdetails-instance-manually)
-        	- [🏭 Constructing ProblemDetails using `ProblemDetailsFactory`](#-constructing-problemdetails-using-problemdetailsfactory)
+            - [🏭 Constructing ProblemDetails using `ProblemDetailsFactory`](#-constructing-problemdetails-using-problemdetailsfactory)
 				- [🏭 Create a ProblemDetails instance](#-create-a-problemdetails-instance)
 				- [🏭 Create a ValidationProblemDetails instance](#-create-a-validationproblemdetails-instance)
-            - [🧬 Delivering Structured Responses via `IProblemDetailsService`](#-delivering-structured-responses-via-iproblemdetailsservice)
-	- [🧰 Configuring Global Exception Handlers](#-configuring-global-exception-handlers)
+        	- [🧬 Delivering Structured Responses via `IProblemDetailsService`](#-delivering-structured-responses-via-iproblemdetailsservice)
+    - [🧰 Configuring Global Exception Handlers](#-configuring-global-exception-handlers)
 		- [🧰 Try/Catch within Middleware](#-trycatch-within-middleware)
 		- [🧰 `IExceptionHandler` Interface (.NET 8+)](#-iexceptionhandler-interface-.net-8)
 			- [🧩 Why Use `IExceptionHandler`?](#-why-use-iexceptionhandler)
 			- [🧬 Integration with ASP.NET Core](#-integration-with-asp.net-core)
 			- [📘 Best Practices](#-best-practices)
-        - [🧰 Chained Exception Handlers](#-chained-exception-handlers)
+		- [🧰 Chained Exception Handlers](#-chained-exception-handlers)
 			- [🧬 Registration Order Matters](#-registration-order-matters)
 			- [🧠 Demonstration](#-demonstration)
 				- [🔗 `ExceptionHandlers/ValidationExceptionHandler.cs`](#-exceptionhandlersvalidationexceptionhandler.cs)
 				- [🔗 `ExceptionHandlers/ExceptionHandler.cs`](#-exceptionhandlersexceptionhandler.cs)
-    - [🔄 End-to-End Request Pipeline: From Request to Structured Error Response](#-end-to-end-request-pipeline-from-request-to-structured-error-response)
+	- [🔄 End-to-End Request Pipeline: From Request to Structured Error Response](#-end-to-end-request-pipeline-from-request-to-structured-error-response)
 	- [🧭 Endpoint Execution Flow — Visualized](#-endpoint-execution-flow-visualized)
 	- [🚨 Common Pitfalls](#-common-pitfalls)
-		- [1. Assuming `Results.BadRequest(...)` Always Returns `ProblemDetails`](#1.-assuming-results.badrequest...-always-returns-problemdetails)
-		- [2. Mixing `TypedResults.Ok(...)` and `TypedResults.BadRequest(...)` in Ternary Expressions](#2.-mixing-typedresults.ok...-and-typedresults.badrequest...-in-ternary-expressions)
+        - [1. Assuming `Results.BadRequest(...)` Always Returns `ProblemDetails`](#1.-assuming-results.badrequest...-always-returns-problemdetails)
+    	- [2. Mixing `TypedResults.Ok(...)` and `TypedResults.BadRequest(...)` in Ternary Expressions](#2.-mixing-typedresults.ok...-and-typedresults.badrequest...-in-ternary-expressions)
 		- [3. Forgetting to Enable `UseStatusCodePages()`](#3.-forgetting-to-enable-usestatuscodepages)
 		- [4. Returning Plain Strings Instead of Structured Errors](#4.-returning-plain-strings-instead-of-structured-errors)
 		- [5. Not Registering `AddControllers()` When Using `ProblemDetailsFactory`](#5.-not-registering-addcontrollers-when-using-problemdetailsfactory)
@@ -63,13 +65,13 @@
 
 Modern APIs must not only deliver results, they must fail gracefully.
 
-Built on **.NET 9**, this demo showcases how to implement structured and consistent error handling in ASP.NET Core using the built-in [`ProblemDetails`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.problemdetails) and [`ValidationProblemDetails`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails) types.
+Built on **.NET 9**, this demo showcases how to implement structured and consistent error handling in ASP.NET Core using the built-in [`ProblemDetails`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.problemdetails) or [`ValidationProblemDetails`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails) types.
 
 By combining Minimal APIs with centralized exception handlers and validation-aware responses, this project demonstrates how thoughtful design enhances both developer experience and consumer clarity. Whether you're building internal services or public APIs, these practices ensure failures are meaningful, traceable, and cleanly formatted.
 
 ## 🎯 Key Objectives
 
-This demo is designed to help developers:
+This demo is designed to help:
 
 - ✅ Understand the purpose and structure of `ProblemDetails` and `ValidationProblemDetails` responses in ASP.NET Core.
 - 🧩 Implement global exception handling using the `IExceptionHandler` interface introduced in .NET 8.
@@ -105,6 +107,7 @@ This solution is organized for clarity and maintainability. Each folder encapsul
 > 📎 Note:  Each module is designed to be self-contained yet cohesive, allowing the exception-handling strategy to scale without entangling unrelated concerns.
 
 ## 🧱 Startup Configuration
+
 These files form the backbone of the demo, managing service registration and request pipeline configuration.
 
 ### 🧱 `Program.cs`
@@ -137,7 +140,7 @@ public static class IoC
 		// Register Validation Exception Handler
 		builder.Services.AddExceptionHandler<ValidationExceptionHandler> ();
 
-		// Register Generic Global Exception Handler
+		// Register Global Fallback Exception Handler
 		builder.Services.AddExceptionHandler<ExceptionHandler> ();
 
 		// Register Fluent Validators
@@ -192,11 +195,12 @@ public static class Middleware
 {
 	public static void ConfigurePipeline (this WebApplication app)
 	{
-		// This middleware activates the global error handler.
-		// It tells Asp Net Core to route any exceptions to our exception handler.
+		// Activates the global exception-handling middleware.
+		// Routes unhandled exceptions to registered IExceptionHandler implementations.
 		app.UseExceptionHandler ();
 
-		// Returns the Problem Details response for (empty) non-successful responses
+		// Returns a ProblemDetails response for (empty) non-successful responses
+		// such as HTTP status codes 400, 404, 409 when the body has not been written.
 		app.UseStatusCodePages ();
 
 		if (app.Environment.IsDevelopment ())
@@ -206,6 +210,8 @@ public static class Middleware
 	}
 }
 ```
+
+> `UseStatusCodePages()` only formats responses when no body has been written. It does not override existing content or wrap manually constructed responses. This makes it ideal for auto-generated errors like 400 or 404 that would otherwise return empty bodies.
 
 > 🧭 These components orchestrate the error-handling lifecycle, from service registration to pipeline wiring. The use of `IExceptionHandler`, `ProblemDetailsFactory`, and `FluentValidation` forms a unified contract for structured error responses.
 
@@ -315,7 +321,7 @@ public sealed class PersonValidator : AbstractValidator<Person>
 
 ### 🖥️ Sample HTTP Requests (`GlobalExceptionHandler.http`)
 
-Below are the HTTP request definitions used to invoke and test the API endpoints. You can run these using Visual Studio's `.http` file support or import them into REST clients like Postman or Insomnia.
+Below are the HTTP request definitions used to invoke and test the API endpoints. You can run these using Visual Studio's `.http` file support or import them into REST clients like `Postman` or `Insomnia`.
 
 ```http
 @GlobalExceptionHandler_HostAddress = http://localhost:5156
@@ -346,11 +352,20 @@ Content-Type: application/json
 }
 ```
 
-> 🧠 These requests help simulate exception scenarios and validation errors, returning `ProblemDetails` or `ValidationProblemDetails` responses. They're a handy reference for understanding how error-handling flows play out in real-time.
+> 🧠 These requests help simulate exception scenarios and validation errors, returning `ProblemDetails` or `ValidationProblemDetails` responses. They're a handy reference for observing how different error-handling flows behave in real-time.
 
 ## 🧾 Sample Error Responses
 
-These examples illustrate how unhandled exceptions and validation failures are translated into structured, JSON-formatted responses using `ProblemDetails` and `ValidationProblemDetails`.
+These examples illustrate how unhandled exceptions and validation failures are translated into structured, JSON-formatted responses using `ProblemDetails` or `ValidationProblemDetails`.
+
+> 🧠 Each endpoint is mapped to a specific error-handling strategy. This table summarizes how faults are intercepted and formatted:
+
+| Endpoint				| Exception Type					| Handled By						| Response Type				|
+|-----------------------|-----------------------------------|-----------------------------------|---------------------------|
+| /exception			| Exception							| ExceptionHandler.cs				| ProblemDetails			|
+| /divideByZero			| DivideByZeroException				| ExceptionHandler.cs				| ProblemDetails			|
+| /badRequest			| None (non-successful response)	| UseStatusCodePages() middleware	| ProblemDetails			|
+| /validationException	| ValidationException				| ValidationExceptionHandler.cs		| ValidationProblemDetails	|
 
 ### 🧾 Unhandled Exception (`/exception`)
 
@@ -386,10 +401,6 @@ These examples illustrate how unhandled exceptions and validation failures are t
 }
 ```
 
-```http
-GET /badRequest
-```
-
 ### 🧾 Auto-Generated 404 (`/badRequest`)
 
 ```json
@@ -412,7 +423,7 @@ GET /badRequest
 | `[FromRoute]`		 | `Results.Problem(...)`		| ✅ Yes					| `application/problem+json`	|
 | `[FromQuery]`		 | `Results.Problem(...)`		| ✅ Yes					| `application/problem+json`	|
 
-> ⚠️ Minimal APIs do **not** automatically wrap `Results.BadRequest(...)` in `ProblemDetails` when the argument is bound from query.  
+> ⚠️ Minimal APIs do **not** automatically wrap `Results.BadRequest(...)` in `ProblemDetails` when the argument is bound from query.
 
 > ✅ To ensure structured error responses, use `Results.Problem(...)` or manually construct a `ProblemDetails` object using `ProblemDetailsFactory`.
 
@@ -451,20 +462,20 @@ Each serves a purpose depending on architectural needs and complexity.
 
 ### 🔍 Comparison of Middleware Strategies
 
-| Approach									| Pros										| Cons													|
-|-------------------------------------------|-------------------------------------------|-------------------------------------------------------|
-| Inline Middleware							| Quick to implement, highly flexible		| Not reusable & testable, and clutters pipeline logic	|
-| Conventional Class-Based implementations	| Testable, reusable, cleanly organized		| Extra boilerplate, manual DI setup					|
-| Factory-Based Middleware (`IMiddleware`)	| Native DI support, good for complex logic	| Requires registration and explicit invocation			|
+| Approach									| Pros										 | Cons																						|
+|-------------------------------------------|--------------------------------------------|------------------------------------------------------------------------------------------|
+| Inline Middleware							| Quick to implement, highly flexible		 | Not reusable or testable, clutters pipeline logic										|
+| Conventional Class-Based implementations	| Testable, reusable, cleanly organized		 | Requires `app.UseMiddleware<T> ()`. Not resolved via DI Container						|
+| Factory-Based Middleware (`IMiddleware`)	| Native DI support, ideal for complex logic | Requires DI registration **and** explicit pipeline wiring via `app.UseMiddleware<T>()`	|
 
-> This README outlines all three styles for architectural comparison. However, the actual demo source **does not include Inline Middleware or Conventional Class-Based implementations**.
+> 📎 This README outlines all three middleware styles for architectural comparison. However, the actual demo source **does not** implement custom middleware. It exclusively demonstrates structured error handling via `IExceptionHandler` implementations.
 
 ### 🔧 Inline Middleware
 
 Inline middleware is ideal for quick demonstrations or lightweight scenarios. It’s written directly within `Program.cs` or as part of the request pipeline configuration. This hybrid approach shows how inline middleware can serve both rapid diagnostics and standards-compliant error responses without needing a full class or `IMiddleware` registration.
 
 ```csharp
-app.Use(async (context, next) =>
+app.Use (async (context, next) =>
 {
 	try
 	{
@@ -472,24 +483,27 @@ app.Use(async (context, next) =>
 	}
 	catch (Exception ex)
 	{
+		// Log the exception
+		var logger = context.RequestServices.GetRequiredService<ILogger<Program>> ();
+		logger.LogError (ex, "An unhandled exception occurred.");
+
 		// Basic inline handling
 		context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-		await context.Response.WriteAsync($"An exception occurred: {ex.Message}");
+		await context.Response.WriteAsync ($"An exception occurred: {ex.Message}");
 
 		// Alternatively, you can use ProblemDetailsFactory to create a structured response.
-		var problemDetails = context.RequestServices.GetRequiredService<ProblemDetailsFactory> ()
-			.CreateProblemDetails(context, StatusCodes.Status500InternalServerError);
 
 		context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-		Dictionary<string, object?> error = new ()
+		var problemDetails = context.RequestServices.GetRequiredService<ProblemDetailsFactory> ()
+			.CreateProblemDetails (context, context.Response.StatusCode);
+
+		problemDetails.Extensions["errors"] = new Dictionary<string, object?>
 		{
 			{ "message", ex.Message }
 		};
 
-		problemDetails.Extensions["errors"] = error;
-
-		await context.Response.WriteAsJsonAsync(problemDetails);
+		await context.Response.WriteAsJsonAsync (problemDetails);
 	}
 });
 ```
@@ -501,26 +515,33 @@ This pattern encapsulates exception-handling logic within a dedicated class. A c
 ```csharp
 public sealed class ConventionalMiddleware
 {
+	private readonly ILogger<ConventionalMiddleware> _logger;
 	private readonly RequestDelegate _next;
 
-	public ConventionalMiddleware (RequestDelegate next)
-		=> _next = next;
+	public ConventionalMiddleware (ILogger<ConventionalMiddleware> logger, RequestDelegate next)
+		=> (_logger, _next) = (logger, next);
 
 	public async Task InvokeAsync(HttpContext context)
 	{
 		try
 		{
-			await next(context);
+			await _next(context);
 		}
 		catch (Exception ex)
 		{
+			// Log the exception
+			_logger.LogError (ex, "An unhandled exception occurred.");
+
 			// Basic exception handling
 			context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 			await context.Response.WriteAsync($"Unhandled exception occurred: {ex.Message}");
 
 			// Alternatively, you can use ProblemDetailsFactory to create a structured response.
+
+			context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
 			var problemDetails = context.RequestServices.GetRequiredService<ProblemDetailsFactory>()
-				.CreateProblemDetails(context, StatusCodes.Status500InternalServerError);
+				.CreateProblemDetails(context, context.Response.StatusCode);
 
 			Dictionary<string, object?> error = new ()
 			{
@@ -538,7 +559,7 @@ public sealed class ConventionalMiddleware
 🧬 Pipeline Integration
 
 ```csharp
-// Register the conventional middleware in the pipeline
+// Register the conventional class-based middleware in the pipeline
 app.UseMiddleware<ConventionalMiddleware>();
 ```
 
@@ -549,6 +570,11 @@ Factory-based middleware implements the `IMiddleware` interface, allowing ASP.NE
 ```csharp
 public sealed class FactoryBasedMiddleware : IMiddleware
 {
+	private readonly ILogger<FactoryBasedMiddleware> _logger;
+
+	public FactoryBasedMiddleware(ILogger<FactoryBasedMiddleware> logger)
+		=> _logger = logger;
+
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
 		try
@@ -557,13 +583,19 @@ public sealed class FactoryBasedMiddleware : IMiddleware
 		}
 		catch (Exception ex)
 		{
+			// Log the exception
+			_logger.LogError (ex, "An unhandled exception occurred.");
+
 			// Basic exception handling
 			context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 			await context.Response.WriteAsync($"Unhandled exception via IMiddleware: {ex.Message}");
 
 			// Alternatively, you can use ProblemDetailsFactory to create a structured response.
+
+			context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
 			var problemDetails = context.RequestServices.GetRequiredService<ProblemDetailsFactory>()
-				.CreateProblemDetails(context, StatusCodes.Status500InternalServerError);
+				.CreateProblemDetails(context, context.Response.StatusCode);
 
 			problemDetails.Extensions["errors"] = new Dictionary<string, object?>
 			{
@@ -617,7 +649,7 @@ The [`RFC 9110`](https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1) s
 
 ### ⚒️ Enabling ProblemDetails for Minimal APIs
 
-Minimal APIs do not serialize `ProblemDetails` automatically like controller-based APIs do. This is because the Minimal API pipeline does **not invoke `IProblemDetailsService` by default**, even for non-successful responses such as `BadRequest`, `NotFound`, or `Unauthorized`.
+Minimal APIs do not respond with `ProblemDetails` automatically like controller-based APIs do. This is because the Minimal API pipeline does **not invoke `IProblemDetailsService` by default**, even for non-successful responses such as `BadRequest`, `NotFound`, or `Unauthorized`.
 
 To ensure consistent, structured JSON error responses in Minimal APIs especially for empty HTTP responses (e.g. 400, 404, 409), you need to explicitly configure two components:
 
@@ -641,7 +673,9 @@ builder.Services.AddProblemDetails(options =>
 🧬 Pipeline Integration
 
 ```csharp
-app.UseStatusCodePages();
+// Returns a ProblemDetails response for (empty) non-successful responses
+// such as HTTP status codes 400, 404, 409 when the body has not been written.
+app.UseStatusCodePages ();
 ```
 
 ### 🧱 Creating and Delivering ProblemDetails Responses
@@ -696,7 +730,7 @@ validationProblemDetails.Extensions["timestamp"] = DateTimeOffset.UtcNow;
 
 #### 🏭 Constructing ProblemDetails using `ProblemDetailsFactory`
 
-The recommended approach is to access `ProblemDetailsFactory` via dependency injection. This service produces enriched, RFC-compliant payloads and integrates seamlessly with customization logic configured at startup. The call to `AddControllers()` is essential. It ensures that `ProblemDetailsFactory` is available in `context.RequestServices`, even if you're not using controllers.
+The recommended approach is to access `ProblemDetailsFactory` via dependency injection. This service produces enriched, RFC-compliant payloads and integrates seamlessly with customization logic configured at startup. The call to `AddControllers()` is essential. It ensures that `ProblemDetailsFactory` service is available in `context.RequestServices`, even if you're not using controllers.
 
 ```csharp
 var problemDetailsFactory = context.RequestServices.GetRequiredService<ProblemDetailsFactory>();
@@ -719,9 +753,7 @@ var modelState = new ModelStateDictionary();
 
 // ModelState is populated with validation errors
 foreach (var error in validationException.Errors)
-{
 	modelState.AddModelError (error.PropertyName, error.ErrorMessage);
-}
 
 var validationProblemDetails = problemDetailsFactory.CreateValidationProblemDetails(context, modelState, StatusCodes.Status400BadRequest);
 ```
@@ -730,7 +762,7 @@ var validationProblemDetails = problemDetailsFactory.CreateValidationProblemDeta
 
 #### 🧬 Delivering Structured Responses via `IProblemDetailsService`
 
-`IProblemDetailsService` is the abstraction responsible for writing `ProblemDetails` and `ValidationProblemDetails` responses to the HTTP output stream. It acts as the final serialization layer in ASP.NET Core’s error-handling pipeline.
+`IProblemDetailsService` is the abstraction responsible for writing `ProblemDetails` or `ValidationProblemDetails` responses to the HTTP output stream. It acts as the final serialization layer in ASP.NET Core’s error-handling pipeline.
 
 This service is automatically registered when `AddProblemDetails()` is called, and is internally used by:
 
@@ -763,13 +795,11 @@ However, this approach has limitations:
 - It lacks modularity and reusability.
 - It bypasses ASP.NET Core’s built-in routing for structured error handling.
 
-While the middleware section of this README demonstrates how to use `ProblemDetailsFactory` within `try/catch` blocks, this pattern is perfectly valid for scoped or isolated scenarios including production use. Conventional Class-Based middleware also supports modular exception handling with full access to DI and structured response formatting.
+While the middleware section of this README demonstrates how to use `ProblemDetailsFactory` within `try/catch` blocks, this pattern is perfectly valid for scoped or isolated scenarios including production use. Conventional Class-Based middleware also supports modular exception handling with full access to DI and structured response formatting, without requiring explicit registration in the DI container.
 
 However, for centralized and framework-integrated error handling, especially when chaining multiple handlers, the `IExceptionHandler` interface offers a cleaner, more declarative approach. It integrates directly with `UseExceptionHandler()` and promotes separation of concerns across exception types.
 
 Choose the strategy that best fits your application's complexity, team preferences, and long-term maintainability goals.
-
-> Kindly refer to the `Middleware` section for example of inline and conventional middleware implementation.
 
 ### 🧰 `IExceptionHandler` Interface (.NET 8+)
 
@@ -816,6 +846,7 @@ app.UseExceptionHandler();
 
 - Scope each handler to a specific exception type, context or domain concern.
 - Use `ProblemDetailsFactory` to generate RFC-compliant responses.
+- `ProblemDetailsFactory` is resolved via `context.RequestServices`. It is not available via constructor injection in middleware or handlers. Always retrieve it from the request context to ensure scoped access and avoid DI resolution errors.
 - Delegate serialization to `IProblemDetailsService` for consistency.
 
 Avoid throwing exceptions from within handlers. Return structured responses instead.
@@ -830,7 +861,7 @@ This mechanism enables scoped handling for different exception types, ensuring t
 
 ### 🧬 Registration Order Matters
 
-As explained in the previous section, multiple `IExceptionHandler` implementations can be registered in the DI container. ASP.NET Core invokes them sequentially based on registration order.
+As explained earlier, multiple `IExceptionHandler` implementations can be registered in the DI container. ASP.NET Core invokes them sequentially based on registration order.
 
 In the current setup, `ValidationExceptionHandler` is prioritized to intercept and format validation-specific faults. If it does not handle the exception, control flows to `ExceptionHandler`, which provides a fallback for all other unhandled exceptions.
 
@@ -853,16 +884,20 @@ This demo includes two `IExceptionHandler` implementations, each scoped to a dif
 Handles exceptions thrown by FluentValidation. It extracts field-level validation errors and returns a structured `ValidationProblemDetails` response. This ensures that clients receive actionable feedback tied to specific input fields.
 
 ```csharp
-public sealed class ValidationExceptionHandler (
-	IProblemDetailsService problemDetailsService,
-	ILogger<ValidationExceptionHandler> logger) : IExceptionHandler
+public sealed class ValidationExceptionHandler : IExceptionHandler
 {
+	private readonly IProblemDetailsService _problemDetailsService;
+	private readonly ILogger<ValidationExceptionHandler> _logger;
+
+	public ValidationExceptionHandler (IProblemDetailsService problemDetailsService, ILogger<ValidationExceptionHandler> logger)
+		=> (_problemDetailsService, _logger) = (problemDetailsService, logger);
+
 	public async ValueTask<bool> TryHandleAsync (HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
 	{
 		if (exception is not ValidationException validationException)
 			return false;
 
-		logger.LogError (exception, exception.Message);
+		_logger.LogError (exception, exception.Message);
 
 		httpContext.Response.StatusCode = exception switch
 		{
@@ -874,9 +909,7 @@ public sealed class ValidationExceptionHandler (
 		var modelState = new ModelStateDictionary ();
 
 		foreach (var error in validationException.Errors)
-		{
 			modelState.AddModelError (error.PropertyName, error.ErrorMessage);
-		}
 
 		var context = new ProblemDetailsContext
 		{
@@ -890,7 +923,7 @@ public sealed class ValidationExceptionHandler (
 
 		context.ProblemDetails.Extensions["timestamp"] = DateTime.Now;
 
-		return await problemDetailsService.TryWriteAsync (context);
+		return await _problemDetailsService.TryWriteAsync (context);
 	}
 }
 ```
@@ -900,11 +933,16 @@ public sealed class ValidationExceptionHandler (
 Acts as a generic fallback for all other unhandled exceptions. It captures the exception message and returns a standardized `ProblemDetails` response enriched with metadata like timestamp and trace ID.
 
 ```csharp
-public sealed class ExceptionHandler (ILogger<ExceptionHandler> logger) : IExceptionHandler
+public sealed class ExceptionHandler : IExceptionHandler
 {
+	private readonly ILogger<ExceptionHandler> _logger;
+
+	public ExceptionHandler (ILogger<ExceptionHandler> logger)
+		=> _logger = logger;
+
 	public async ValueTask<bool> TryHandleAsync (HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
 	{
-		logger.LogError (exception, exception.Message);
+		_logger.LogError (exception, exception.Message);
 
 		httpContext.Response.StatusCode = exception switch
 		{
@@ -930,6 +968,8 @@ public sealed class ExceptionHandler (ILogger<ExceptionHandler> logger) : IExcep
 }
 ```
 
+> 📎 Unlike `ValidationExceptionHandler.cs`, which uses `IProblemDetailsService` to serialize the response, `ExceptionHandler.cs` demonstrates an alternative approach by writing the `ProblemDetails` object directly using `httpContext.Response.WriteAsJsonAsync(...)`. This highlights both framework-integrated and manual serialization strategies.
+
 > 🧠 This modular approach ensures that each exception type is handled with the appropriate level of detail and formatting, improving client-side parsing and developer diagnostics.
 
 ## 🔄 End-to-End Request Pipeline: From Request to Structured Error Response
@@ -939,39 +979,45 @@ Let’s walk through how a client interacts with the API beginning with a reques
 ```
 [1] 📨 Client sends HTTP request
 	└── Example:
-		- `GET /exception`
-		- `GET /divideByZero`
-		- `GET /badRequest`
-		- `POST /validationException` with JSON payload
+		- GET /exception
+		- GET /divideByZero
+		- GET /badRequest
+		- POST /validationException with JSON payload
+		{
+			"firstName": "",
+			"lastName": "Doe",
+			"eMail": "doe.john",
+			"mobileNo": "+91 9999999999"
+		}
 
 	✅ These endpoints are designed to simulate runtime exceptions, validation failures, and empty responses.
 
-[2] 🧱 Middleware intercepts the request  
-	└── `UseExceptionHandler()` routes exceptions to registered handlers  
-	└── `UseStatusCodePages()` ensures empty error responses are serialized using `ProblemDetails`
+[2] 🧱 Middleware intercepts the request
+	└── UseExceptionHandler() routes exceptions to registered handlers
+	└── UseStatusCodePages() ensures empty error responses are serialized using `ProblemDetails`
 
 	✅ These components ensure that faults are intercepted early and formatted consistently.
 
 [3] 🧪 Endpoint logic executes
-	└── `/exception` throws a generic `Exception`
-	└── `/divideByZero` triggers a `DivideByZeroException`
-	└── `/badRequest` returns a `400 Bad Request` response when the `name` is null
-	└── `/validationException` invokes FluentValidation on the `Person` payload
+	└── /exception throws a generic Exception
+	└── /divideByZero triggers a DivideByZeroException
+	└── /badRequest returns a 400 Bad Request response when the name is null
+	└── /validationException invokes FluentValidation on the Person request payload
 
-	🔍 If validation fails, a `ValidationException` is thrown
+	🔍 If validation fails, a ValidationException is thrown
 	💥 If an unhandled exception occurs, it is routed to the appropriate handler
 	❌ If a required route parameter is missing, ASP.NET Core returns a structured 404 automatically
 
-	✅ Both `/badRequest` and `/validationException` return responses with the `application/problem+json` content type ensuring clients receive standardized error payloads.
+	✅ Both /badRequest and /validationException return responses with the application/problem+json content type ensuring clients receive standardized error payloads.
 
 [4] 🧰 Exception handler processes the fault
-	└── `ValidationExceptionHandler` handles validation errors
-		└── Builds `ValidationProblemDetails` using `ProblemDetailsFactory`
-		└── Serializes response via `IProblemDetailsService`
+	└── ValidationExceptionHandler handles validation errors only
+		└── Builds ValidationProblemDetails using ProblemDetailsFactory
+		└── Serializes response via IProblemDetailsService
 
-	└── `ExceptionHandler` handles all other exceptions
-		└── Builds `ProblemDetails` with enriched metadata
-		└── Serializes response via `IProblemDetailsService`
+	└── ExceptionHandler handles all other exceptions
+		└── Builds ProblemDetails with enriched metadata
+		└── Serializes response using httpContext.Response.WriteAsJsonAsync(...)
 
 	✅ Handlers are registered in `Startup/IoC.cs`
 
@@ -999,7 +1045,7 @@ This diagram visually reinforces the lifecycle described in the previous section
 
 > 🧭 Responses are returned as `application/problem+json` **only when** explicitly structured using `TypedResults.Problem(...)` or handled via exception-handling logic.
 
-> ⚠️ For a detailed breakdown of how response formatting varies based on argument source and return type, see `🧾 Sample Error Responses` section.
+> ⚠️ For a detailed breakdown of how response formatting varies based on argument source and return type, see `🧾 Sample Error Responses` section above.
 
 ## 🚨 Common Pitfalls
 
@@ -1009,7 +1055,7 @@ Even with a well-structured exception-handling pipeline, certain behaviors in Mi
 
 Minimal APIs only wrap `BadRequest` responses in `ProblemDetails` when the argument is bound from **route parameters**. If the value comes from a **query string**, the response is typically plain text or unstructured JSON.
 
-> Use `TypedResults.Problem(...)` or manually construct a `ProblemDetails` object for consistent formatting.
+> Use `TypedResults.Problem(...)` or prefer using `ProblemDetailsFactory` to ensure consistent formatting and metadata enrichment.
 
 ### 2. Mixing `TypedResults.Ok(...)` and `TypedResults.BadRequest(...)` in Ternary Expressions
 
@@ -1026,7 +1072,7 @@ return name is null
 
 ### 3. Forgetting to Enable `UseStatusCodePages()`
 
-Without `UseStatusCodePages()`, empty error responses (e.g. 404 from unmatched routes) will not be serialized as `ProblemDetails`.
+Without `UseStatusCodePages()`, (empty) non-successful error responses (e.g. 404 from unmatched routes) will not be serialized as `ProblemDetails`.
 
 > Always enable `UseStatusCodePages()` in the middleware pipeline to ensure structured responses for framework-generated errors.
 
@@ -1051,9 +1097,9 @@ To ensure consistent and developer-friendly error handling in Minimal APIs, foll
 -  Centralize exception handling using `IExceptionHandler` implementations for modular, reusable fault logic.
 -  Use `ProblemDetailsFactory` to generate consistent, metadata-rich error responses across handlers and endpoints.
 -  Enable `UseStatusCodePages()` to ensure framework-generated errors (e.g. 404, 401, 409) are serialized as `ProblemDetails`.
--  Register `AddControllers()` even if you're not using MVC — it's required to activate `ProblemDetailsFactory`.
+-  Register `AddControllers()` even if you're not using MVC. It's required to activate `ProblemDetailsFactory`.
 -  Register specific exception handlers before generic ones to ensure precise fault routing.
--  Avoid returning plain strings for errors — prefer structured responses using `TypedResults.Problem(...)` or custom handlers.
+-  Avoid returning plain strings for errors. Prefer structured responses using `TypedResults.Problem(...)` or custom handlers.
 -  Always set meaningful `title`, `status`, and `instance` fields in `ProblemDetails` to improve client-side diagnostics or fetch relevant values from `ProblemDetailsFactory` which auto populates these fields based on the status code.
 -  Enrich `ProblemDetails.Extensions` with contextual metadata like `timestamp`, `traceId`, or `errors` for better observability.
 -  Use `TypedResults.Ok(...)` and `TypedResults.Problem(...)` consistently to avoid type mismatches and improve readability.
@@ -1082,22 +1128,22 @@ This global exception-handling approach is designed not just for correctness, bu
 
 These resources provide deeper context and official guidance on the concepts and components used in this demo:
 
-- [RFC 9110 — HTTP Semantics: Section 15.6.1](https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1)  
+- [RFC 9110 — HTTP Semantics: Section 15.6.1](https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1)
 	Defines the structure and semantics of `application/problem+json` error responses.
 
-- [ASP.NET Core ProblemDetails Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.problemDetails)  
+- [ASP.NET Core ProblemDetails Documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.problemDetails)
 	Official API reference for the `ProblemDetails` class used in structured error formatting.
 
-- [Minimal APIs in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis)  
+- [Minimal APIs in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis)
 	Overview of Minimal API design, routing, and response handling.
 
-- [FluentValidation for .NET](https://docs.fluentvalidation.net/en/latest/)  
+- [FluentValidation for .NET](https://docs.fluentvalidation.net/en/latest/)
 	Documentation for the validation library used to enforce input constraints.
 
-- [IExceptionHandler Interface](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.diagnostics.iExceptionHandler)  
+- [IExceptionHandler Interface](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.diagnostics.iExceptionHandler)
 	ASP.NET Core interface for building modular exception handlers.
 
-- [UseStatusCodePages Middleware](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.statuscodepagesextensions.usestatuscodepages)  
+- [UseStatusCodePages Middleware](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.statuscodepagesextensions.usestatuscodepages)
 	Middleware that ensures empty responses are serialized with meaningful content.
 
 > 📎 These references complement the demo and provide deeper insight into the architectural decisions behind it.
