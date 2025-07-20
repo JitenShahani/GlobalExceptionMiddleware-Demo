@@ -859,7 +859,7 @@ ASP.NET Core allows multiple `IExceptionHandler` implementations to be registere
 
 This mechanism enables scoped handling for different exception types, ensuring that each fault is processed with the appropriate level of detail and formatting.
 
-### 🧬 Registration Order Matters
+#### 🧬 Registration Order Matters
 
 As explained earlier, multiple `IExceptionHandler` implementations can be registered in the DI container. ASP.NET Core invokes them sequentially based on registration order.
 
@@ -869,7 +869,7 @@ In the current setup, `ValidationExceptionHandler` is prioritized to intercept a
 
 This layered approach ensures that each exception type receives an appropriately structured response, enhancing both client-side clarity and server-side traceability.
 
-### 🧠 Demonstration
+#### 🧠 Demonstration
 
 This demo includes two `IExceptionHandler` implementations, each scoped to a different category of exceptions:
 
@@ -879,7 +879,7 @@ This demo includes two `IExceptionHandler` implementations, each scoped to a dif
 | `DivideByZeroException`	| `ExceptionHandler`			| `ProblemDetails`				|
 | Other `Exception` types	| `ExceptionHandler`			| `ProblemDetails`				|
 
-#### 🔗 `ExceptionHandlers/ValidationExceptionHandler.cs`
+##### 🔗 `ExceptionHandlers/ValidationExceptionHandler.cs`
 
 Handles exceptions thrown by FluentValidation. It extracts field-level validation errors and returns a structured `ValidationProblemDetails` response. This ensures that clients receive actionable feedback tied to specific input fields.
 
@@ -928,7 +928,7 @@ public sealed class ValidationExceptionHandler : IExceptionHandler
 }
 ```
 
-#### 🔗 `ExceptionHandlers/ExceptionHandler.cs`
+##### 🔗 `ExceptionHandlers/ExceptionHandler.cs`
 
 Acts as a generic fallback for all other unhandled exceptions. It captures the exception message and returns a standardized `ProblemDetails` response enriched with metadata like timestamp and trace ID.
 
