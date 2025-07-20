@@ -1051,7 +1051,7 @@ This diagram visually reinforces the lifecycle described in the previous section
 
 Even with a well-structured exception-handling pipeline, certain behaviors in Minimal APIs can lead to unexpected or inconsistent responses. Here are some common pitfalls to watch out for:
 
-### 1. Assuming `Results.BadRequest(...)` Always Returns `ProblemDetails`
+### 1. Assuming `Results.BadRequest(...)` always returns `ProblemDetails`
 
 Minimal APIs only wrap `BadRequest` responses in `ProblemDetails` when the argument is bound from **route parameters**. If the value comes from a **query string**, the response is typically plain text or unstructured JSON.
 
@@ -1070,19 +1070,19 @@ return name is null
 
 > Use `Results.BadRequest(...)` and `Results.Ok(...)`, or cast to `IResult`. Alternatively, use `Results.BadRequest()` and `TypedResults.Ok()`.
 
-### 3. Forgetting to Enable `UseStatusCodePages()`
+### 3. Forgetting to enable `UseStatusCodePages()`
 
 Without `UseStatusCodePages()`, (empty) non-successful error responses (e.g. 404 from unmatched routes) will not be serialized as `ProblemDetails`.
 
 > Always enable `UseStatusCodePages()` in the middleware pipeline to ensure structured responses for framework-generated errors.
 
-### 4. Returning Plain Strings Instead of Structured Errors
+### 4. Returning Plain Strings instead of Structured Errors
 
 Returning a string from `Results.BadRequest("...")` or throwing exceptions without a handler leads to unstructured responses.
 
 > Use `ProblemDetailsFactory` and `TypedResults.Problem(...)` to ensure RFC-compliant error payloads.
 
-### 5. Not Registering `AddControllers()` When Using `ProblemDetailsFactory`
+### 5. Not Registering `AddControllers()` when using `ProblemDetailsFactory`
 
 `ProblemDetailsFactory` is registered via `AddControllers()`. Without it, you’ll get a runtime error when trying to resolve the service.
 
